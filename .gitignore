@@ -1,0 +1,63 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Build output
+dist/
+build/
+coverage/
+
+# IDE & OS specific files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Local environment config
+.envrc
+.editorconfig
+*.local.js
+*.local.json
+
+# Optional: If you use Firebase Admin SDK key files
+serviceAccountKey.json
+
+# Optional: If you use Docker
+docker-compose.override.yml
+*.env.docker
+
+# Optional: If you use pm2 or other process managers
+.pm2/
+
+# Optional: If using test coverage tools
+coverage/
+.nyc_output/
+
+# Optional: If you zip uploads or store temp files
+uploads/
+temp/
+tmp/
