@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum FriendRequestStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum MatchStatus {
+  WAITING
+  IN_PROGRESS
+  COMPLETED
+  ABANDONED
+}
+
+model User {
+  id String @id
+
+  username String
+
+  country String?
+  favoriteTeam String?
+  discordUsername String?
+  bio String?
+
+  matchesPlayed Int @default(0)
+  matchesWon Int @default(0)
+
+  totalRunsScored Int @default(0)
+  totalRunsConceded Int @default(0)
+
+  netRunRate Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sentFriendRequests FriendRequest[] @relation("FriendRequestSender")
+  receivedFriendRequests FriendRequest[] @relation("FriendRequestReceiver")
+
+  friendsAsUser1 Friend[] @relation("FriendUser1")
+  friendsAsUser2 Friend[] @relation("FriendUser2")
+
+  matchesAsPlayer1 Match[] @relation("MatchPlayer1")
+  matchesAsPlayer2 Match[] @relation("MatchPlayer2")
+
+  matchesWonList Match[] @relation("MatchWinner")
+}
+
+model FriendRequest {
+  id String @id @default(uuid())
+
+  senderId String
+  receiverId String
+
+  status FriendRequestStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sender User @relation("FriendRequestSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  receiver User @relation("FriendRequestReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId])
+  @@index([receiverId])
+}
+
+model Friend {
+  id String @id @default(uuid())
+
+  user1Id String
+  user2Id String
+
+  createdAt DateTime @default(now())
+
+  user1 User @relation("FriendUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+
+  user2 User @relation("FriendUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  @@unique([user1Id, user2Id])
+}
+
+model Match {
+  id String @id @default(uuid())
+
+  player1Id String
+  player2Id String
+
+  winnerId String?
+
+  status MatchStatus @default(WAITING)
+
+  overs Int
+  wickets Int
+
+  battingFirstPlayerId String?
+
+  player1Score Int @default(0)
+  player2Score Int @default(0)
+
+  player1WicketsLost Int @default(0)
+  player2WicketsLost Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  completedAt DateTime?
+  expiresAt DateTime?
+
+  player1 User @relation("MatchPlayer1", fields: [player1Id], references: [id])
+
+  player2 User @relation("MatchPlayer2", fields: [player2Id], references: [id])
+
+  winner User? @relation("MatchWinner", fields: [winnerId], references: [id])
+
+  @@index([player1Id])
+  @@index([player2Id])
+  @@index([winnerId])
+  @@index([status])
+}
