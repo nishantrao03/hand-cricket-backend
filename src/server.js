@@ -15,6 +15,8 @@ const createUserRoute = require('./routes/createUser');
 const fetchUserRoute = require('./routes/fetchUser');
 const fetchMatchRoute = require('./routes/fetchMatch');
 const sendFriendRequestRoute = require('./routes/sendFriendRequest');
+const createMatchInvitationRoute = require('./routes/createMatchInvitation');
+const fetchMatchInvitationRoute = require('./routes/fetchMatchInvitation');
 
 const socketHandler = require("./socket/socketHandler");
 
@@ -92,6 +94,10 @@ app.use(fetchUserRoute);
 app.use(sendFriendRequestRoute);
 
 app.use(fetchMatchRoute);
+
+app.use(createMatchInvitationRoute);
+
+app.use(fetchMatchInvitationRoute);
 
 const server =
     http.createServer(app);

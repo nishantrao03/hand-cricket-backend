@@ -16,6 +16,9 @@ const createMatch =
 const updateUser =
     require("../db/tools/updateUser");
 
+const deleteMatchInvitation =
+    require("../db/tools/deleteMatchInvitation");
+
 function cleanupMatch(
     matchId
 ) {
@@ -44,9 +47,9 @@ function cleanupMatch(
 }
 
 function endMatch(
-    io,
-    matchId,
-    reason
+    io,
+    matchId,
+    reason
 ) {
 
     try {
@@ -101,50 +104,77 @@ function endMatch(
         );
 
         setTimeout(
-        () => {
+            async () => {
 
-            try {
+                try {
 
-                const sockets =
-                    io.sockets.adapter.rooms.get(
+                    const sockets =
+                        io.sockets.adapter.rooms.get(
+                            matchId
+                        );
+
+                    if (sockets) {
+
+                        sockets.forEach(
+                            (socketId) => {
+
+                                const socket =
+                                    io.sockets.sockets.get(
+                                        socketId
+                                    );
+
+                                if (socket) {
+
+                                    socket.disconnect(
+                                        true
+                                    );
+                                }
+                            }
+                        );
+                    }
+
+                    try {
+
+                        const result =
+                            await deleteMatchInvitation({
+
+                                id:
+                                    matchId
+                            });
+
+                        if (
+                            !result.success
+                        ) {
+
+                            console.error(
+                                `Failed to delete invitation ${matchId}:`,
+                                result.error
+                            );
+                        }
+
+                    } catch (deleteErr) {
+
+                        console.error(
+                            `Invitation deletion error for ${matchId}:`,
+                            deleteErr
+                        );
+                    }
+
+                    cleanupMatch(
                         matchId
                     );
 
-                if (sockets) {
+                } catch (innerErr) {
 
-                    sockets.forEach(
-                        (socketId) => {
-
-                            const socket =
-                                io.sockets.sockets.get(
-                                    socketId
-                                );
-
-                            if (socket) {
-
-                                socket.disconnect(
-                                    true
-                                );
-                            }
-                        }
+                    console.error(
+                        `endMatch cleanup error for ${matchId}:`,
+                        innerErr
                     );
                 }
 
-                cleanupMatch(
-                    matchId
-                );
-
-            } catch (innerErr) {
-
-                console.error(
-                    `endMatch cleanup error for ${matchId}:`,
-                    innerErr
-                );
-            }
-
-        },
-        1000
-    );
+            },
+            1000
+        );
 
     } catch (err) {
 
@@ -154,9 +184,23 @@ function endMatch(
         );
 
         try {
-            io.to(matchId).emit("error", { message: "Internal server error" });
+
+            io.to(
+                matchId
+            ).emit(
+                "error",
+                {
+                    message:
+                        "Internal server error"
+                }
+            );
+
         } catch (emitErr) {
-            console.error("Failed to emit error in endMatch:", emitErr);
+
+            console.error(
+                "Failed to emit error in endMatch:",
+                emitErr
+            );
         }
     }
 }
@@ -625,7 +669,13 @@ module.exports = (io) => {
                 ).emit(
                     "match-ready",
                     {
-                        matchId
+                        matchId,
+
+                        player1Id:
+                            match.player1Id,
+
+                        player2Id:
+                            match.player2Id
                     }
                 );
 

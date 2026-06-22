@@ -123,3 +123,11 @@ model Match {
   @@index([winnerId])
   @@index([status])
 }
+
+model MatchInvitation {
+  id String @id
+  overs Int @default(5)
+  wickets Int @default(10)
+
+  createdAt DateTime @default(now())
+}

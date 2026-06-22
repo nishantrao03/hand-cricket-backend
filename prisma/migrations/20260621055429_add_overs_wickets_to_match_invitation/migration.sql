@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "MatchInvitation" ADD COLUMN     "overs" INTEGER NOT NULL DEFAULT 5,
+ADD COLUMN     "wickets" INTEGER NOT NULL DEFAULT 10;

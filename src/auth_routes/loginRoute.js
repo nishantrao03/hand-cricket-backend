@@ -55,7 +55,7 @@ router.post('/login', async (req, res) => {
       secure: process.env.NODE_ENV === 'production', // secure in production
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // 'None' in production, 'Strict' in development   
       // maxAge: 7 * 24 * 3600 * 1000, // 7 days
-      maxAge: 20 * 1000, // 1 minute for testing
+      maxAge: 3600 * 1000, // 1 minute for testing
     });
 
     // Step 4: Send success response

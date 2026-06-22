@@ -106,6 +106,21 @@ class GameEngine {
             ? match.innings1
             : match.innings2;
 
+    const batterId =
+
+    match.innings === 1
+
+        ? match.battingFirstPlayerId
+
+        : (
+            match.battingFirstPlayerId ===
+            match.player1Id
+
+                ? match.player2Id
+
+                : match.player1Id
+        );
+
     let runs = 0;
     let wicketsLost = 0;
 
@@ -229,6 +244,8 @@ class GameEngine {
             return {
                 ballResult: {
 
+                    batterId,
+
                     runs,
 
                     wicketsLost,
@@ -255,6 +272,8 @@ class GameEngine {
         return {
             ballResult: {
 
+                batterId,
+
                 runs,
 
                 wicketsLost,
@@ -279,6 +298,8 @@ class GameEngine {
     }
 
     return {
+
+        batterId,
 
         runs,
 
