@@ -27,6 +27,8 @@ const PORT =
 
 app.use(express.json());
 
+app.set('trust proxy', 1); 
+
 app.use(cookieParser());
 
 const allowedOrigins = [
