@@ -32,10 +32,9 @@ router.post('/refresh-token', (req, res) => {
 
     res.cookie('access_token', newAccessToken, {
       httpOnly: true,
-      secure: false,
-      sameSite: 'Strict', // 'None' in production, 'Strict' in development   
-      // maxAge: 3600 * 1000, // 1 hour
-      maxAge: 7 * 24 * 3600 * 1000, // 10 seconds for testing
+      secure: process.env.NODE_ENV === 'production', // true in production, false in development
+      sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // 'None' in production, 'Strict' in development   
+      maxAge: 10 * 1000, // 10 minutes
       path: '/'
     });
 
