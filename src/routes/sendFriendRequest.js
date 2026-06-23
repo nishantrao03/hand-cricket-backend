@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const sendFriendRequestTool = require('../db/tools/sendFriendRequest');
+const authenticate = require('../authenticate');
 
-router.post('/api/send-request', async (req, res) => {
+router.post('/api/send-request', authenticate, async (req, res) => {
   try {
     const { senderId, receiverId } = req.body || {};
     const result = await sendFriendRequestTool({ senderId, receiverId });

@@ -3,9 +3,11 @@ const router = express.Router();
 
 const fetchMatchInvitationTool =
     require('../db/tools/fetchMatchInvitation');
+const authenticate = require('../authenticate');
 
 router.post(
     '/api/fetch-match-invitation',
+    authenticate,
     async (req, res) => {
 
         try {

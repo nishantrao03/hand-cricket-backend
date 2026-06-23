@@ -40,6 +40,7 @@ router.post('/login', async (req, res) => {
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // 'None' in production, 'Strict' in development    
       // maxAge: 900 * 1000, // 1 hour
       maxAge: 10 * 1000, // 10 minutes
+      path: '/'
     });
     
     // res.cookie('refresh_token', refreshToken, {
@@ -56,6 +57,7 @@ router.post('/login', async (req, res) => {
       sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Strict', // 'None' in production, 'Strict' in development   
       // maxAge: 7 * 24 * 3600 * 1000, // 7 days
       maxAge: 3600 * 1000, // 1 minute for testing
+      path: '/refresh-token'
     });
 
     // Step 4: Send success response

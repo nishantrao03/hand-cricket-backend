@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 
 const createUserTool = require('../db/tools/createUser');
+const authenticate = require('../authenticate');
 
-router.post('/api/create-user', async (req, res) => {
+router.post('/api/create-user', authenticate, async (req, res) => {
   try {
     const payload = req.body || {};
     console.log(payload);

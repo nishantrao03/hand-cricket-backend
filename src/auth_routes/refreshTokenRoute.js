@@ -36,6 +36,7 @@ router.post('/refresh-token', (req, res) => {
       sameSite: 'Strict', // 'None' in production, 'Strict' in development   
       // maxAge: 3600 * 1000, // 1 hour
       maxAge: 7 * 24 * 3600 * 1000, // 10 seconds for testing
+      path: '/'
     });
 
     return res.status(200).json({ message: 'Access token refreshed' });
