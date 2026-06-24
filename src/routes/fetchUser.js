@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate =
-    require('../authenticate');
+    require('../auth_utils/authenticate');
 
 const fetchUserTool =
     require('../db/tools/fetchUser');

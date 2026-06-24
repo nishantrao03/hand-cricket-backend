@@ -19,6 +19,8 @@ const updateUser =
 const deleteMatchInvitation =
     require("../db/tools/deleteMatchInvitation");
 
+const authenticateSocket = require("../auth_utils/socketAuthenticate");
+
 function cleanupMatch(
     matchId
 ) {
@@ -519,6 +521,8 @@ async function persistMatchResult(
 
 module.exports = (io) => {
 
+    io.use(authenticateSocket);
+
     io.on(
         "connection",
         (socket) => {
@@ -679,6 +683,8 @@ module.exports = (io) => {
                     }
                 );
 
+                // phase = "TOSS"
+
                 console.log(
                     `Match ${matchId} is READY`
                 );
@@ -695,10 +701,15 @@ module.exports = (io) => {
                     tossResult
                 );
 
+                // phase = "WAITING_FOR_CHOICE" OR "ROLE_SELECTION", "CHOICE"
+
                 console.log(
     `Toss Winner: ${tossResult.tossWinnerId}`
 );
             }
+            // else {
+            //     phase = "WAITING"
+            // }
 
         } catch (err) {
 
@@ -774,6 +785,8 @@ module.exports = (io) => {
                     innings: 1
                 }
             );
+
+            // phase = "PLAYING"
 
             console.log(
                 `${playerId} chose ${choice} in ${matchId}`
@@ -946,10 +959,11 @@ module.exports = (io) => {
                 result.matchResult
             ) {
 
+                console.log("PERSISTING MATCH");
               await  persistMatchResult(
         matchId
     );
-
+                console.log("MATCH SAVED");
                 endMatch(
                     io,
                     matchId,

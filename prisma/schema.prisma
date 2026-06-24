@@ -122,6 +122,7 @@ model Match {
   @@index([player2Id])
   @@index([winnerId])
   @@index([status])
+  @@index([completedAt])
 }
 
 model MatchInvitation {

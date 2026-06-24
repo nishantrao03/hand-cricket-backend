@@ -17,6 +17,9 @@ const fetchMatchRoute = require('./routes/fetchMatch');
 const sendFriendRequestRoute = require('./routes/sendFriendRequest');
 const createMatchInvitationRoute = require('./routes/createMatchInvitation');
 const fetchMatchInvitationRoute = require('./routes/fetchMatchInvitation');
+const fetchMatchHistoryRoute = require('./routes/fetchMatchHistory');
+const fetchFriendsRoute = require("./routes/fetchFriends");
+const removeFriendRoute = require('./routes/removeFriend');
 
 const socketHandler = require("./socket/socketHandler");
 
@@ -101,6 +104,12 @@ app.use(fetchMatchRoute);
 app.use(createMatchInvitationRoute);
 
 app.use(fetchMatchInvitationRoute);
+
+app.use(fetchMatchHistoryRoute);
+
+app.use(fetchFriendsRoute);
+
+app.use(removeFriendRoute);
 
 const server =
     http.createServer(app);

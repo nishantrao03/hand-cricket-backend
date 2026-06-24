@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const fetchMatchTool = require('../db/tools/fetchMatch');
-const authenticate = require('../authenticate');
+const authenticate = require('../auth_utils/authenticate');
 
 // GET /api/fetch-match?id=<matchId>
 router.get('/api/fetch-match', authenticate, async (req, res) => {

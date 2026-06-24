@@ -3,7 +3,7 @@ const router = express.Router();
 
 const fetchMatchInvitationTool =
     require('../db/tools/fetchMatchInvitation');
-const authenticate = require('../authenticate');
+const authenticate = require('../auth_utils/authenticate');
 
 router.post(
     '/api/fetch-match-invitation',

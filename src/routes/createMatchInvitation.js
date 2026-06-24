@@ -3,7 +3,7 @@ const router = express.Router();
 
 const createMatchInvitationTool =
     require('../db/tools/createMatchInvitation');
-const authenticate = require('../authenticate');
+const authenticate = require('../auth_utils/authenticate');
 
 router.post(
     '/api/create-match-invitation',

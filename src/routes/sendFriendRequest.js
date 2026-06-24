@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const sendFriendRequestTool = require('../db/tools/sendFriendRequest');
-const authenticate = require('../authenticate');
+const authenticate = require('../auth_utils/authenticate');
 
 router.post('/api/send-request', authenticate, async (req, res) => {
   try {
