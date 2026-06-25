@@ -2,14 +2,14 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate = require('../auth_utils/authenticate');
-const fetchFriendsTool = require('../db/tools/fetchFriends');
+const fetchFriendRequestsTool = require('../db/tools/fetchFriendRequests');
 
 /*
- * GET /api/fetch-friends
- * Retrieves the authenticated user's friend list.
+ * GET /api/fetch-friend-requests
+ * Retrieves the authenticated user's friend requests.
  */
 router.get(
-    '/api/fetch-friends',
+    '/api/fetch-friend-requests',
     authenticate,
     async (req, res) => {
         try {
@@ -18,7 +18,7 @@ router.get(
             console.log(userId);
 
             // Execute the database tool with the required input structure
-            const result = await fetchFriendsTool({
+            const result = await fetchFriendRequestsTool({
                 userId
             });
 
@@ -26,7 +26,7 @@ router.get(
             return res.json(result);
 
         } catch (err) {
-            console.error('fetch-friends route error:', err);
+            console.error('fetch-friend-requests route error:', err);
 
             // Fallback error formatting matching the standard API response structure
             return res.status(500).json({

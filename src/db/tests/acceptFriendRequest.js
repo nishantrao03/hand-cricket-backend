@@ -1,6 +1,6 @@
 const acceptFriendRequest = require('../tools/acceptFriendRequest');
 
 (async () => {
-  const res = await acceptFriendRequest({ senderId: 'test-user-1', receiverId: 'test-user-3' });
+  const res = await acceptFriendRequest({ senderId: 'evsth9VTpIPVfC86awHp1f2ddeh2', receiverId: 'lzZXn5fpYZekciRDetILPL8Uoi02' });
   console.log('acceptFriendRequest result:', res);
 })();
