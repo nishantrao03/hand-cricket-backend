@@ -23,6 +23,7 @@ const removeFriendRoute = require('./routes/removeFriend');
 const acceptFriendRequestRoute = require('./routes/acceptFriendRequest');
 const declineFriendRequestRoute = require('./routes/declineFriendRequest');
 const fetchFriendRequestsRoute = require('./routes/fetchFriendRequests');
+const updateUserRoute = require('./routes/updateUser');
 
 const socketHandler = require("./socket/socketHandler");
 
@@ -119,6 +120,8 @@ app.use(acceptFriendRequestRoute);
 app.use(declineFriendRequestRoute);
 
 app.use(fetchFriendRequestsRoute);
+
+app.use(updateUserRoute);
 
 const server =
     http.createServer(app);
