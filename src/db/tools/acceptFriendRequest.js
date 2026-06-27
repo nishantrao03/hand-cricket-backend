@@ -15,9 +15,12 @@ module.exports = async function acceptFriendRequest(input) {
       };
     }
 
+    console.log("Starting transaction");
+
     // Executes the creation and deletion operations atomically
     const friend = await prisma.$transaction(async (tx) => {
       // Normalizes user IDs to maintain consistent composite keys
+      console.log("Transaction started");
       const [user1Id, user2Id] =
         senderId < receiverId
           ? [senderId, receiverId]
@@ -38,6 +41,8 @@ module.exports = async function acceptFriendRequest(input) {
         }
       });
 
+      console.log("Upsert finished");
+
       // Removes the pending friend request after friendship establishment
       const deletedFR = await tx.friendRequest.deleteMany({
         where: {
@@ -46,6 +51,8 @@ module.exports = async function acceptFriendRequest(input) {
           status: 'PENDING'
         }
       });
+
+      console.log("Delete finished");
 
       // Triggers a transaction rollback if no pending request was found
       if (deletedFR.count === 0) {

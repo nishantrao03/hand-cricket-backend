@@ -5,6 +5,10 @@ const createMatchInvitationTool =
     require('../db/tools/createMatchInvitation');
 const authenticate = require('../auth_utils/authenticate');
 
+const {
+    setMatchInvitation
+} = require("../cache/set_methods/setMatchInvitation");
+
 router.post(
     '/api/create-match-invitation',
     authenticate,
@@ -35,6 +39,28 @@ router.post(
                     overs,
                     wickets
                 });
+
+            try {
+
+                if (result.success) {
+
+                    await setMatchInvitation(
+                        id,
+                        result
+                    );
+
+                    console.log(
+                        `Cache SET: matchInvitation:${id}`
+                    );
+                }
+
+            } catch (cacheErr) {
+
+                console.error(
+                    "Redis SET Error:",
+                    cacheErr
+                );
+            }
 
             return res.json(
                 result

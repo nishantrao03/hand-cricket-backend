@@ -64,7 +64,9 @@ class MatchManager {
                 bowler: 0
             },
 
-            resultHistory: []
+            resultHistory: [],
+
+            phase: "WAITING"
         };
 
         activeMatches.set(matchId, match);

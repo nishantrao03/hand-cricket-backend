@@ -3,10 +3,10 @@ const router = express.Router();
 
 const declineFriendRequestTool = require('../db/tools/declineFriendRequest');
 const authenticate = require('../auth_utils/authenticate');
+const { deleteFriendRequests } = require("../cache/delete_methods/deleteFriendRequests");
 
 router.post('/api/decline-friend-request', authenticate, async (req, res) => {
     try {
-        // The receiver is the authenticated user making the request to decline
         const receiverId = req.user.id;
         const { senderId } = req.body || {};
 
@@ -22,6 +22,13 @@ router.post('/api/decline-friend-request', authenticate, async (req, res) => {
 
         if (!result.success) {
             return res.status(400).json(result);
+        }
+
+        try {
+            await deleteFriendRequests(receiverId);
+            console.log(`Cache Invalidated: friendRequests:${receiverId}`);
+        } catch (cacheErr) {
+            console.error("Redis Delete Error:", cacheErr);
         }
 
         return res.status(200).json(result);

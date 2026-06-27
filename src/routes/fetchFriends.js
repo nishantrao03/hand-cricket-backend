@@ -4,6 +4,9 @@ const router = express.Router();
 const authenticate = require('../auth_utils/authenticate');
 const fetchFriendsTool = require('../db/tools/fetchFriends');
 
+const { getFriends } = require("../cache/get_methods/getFriends");
+const { setFriends } = require("../cache/set_methods/setFriends");
+
 /*
  * GET /api/fetch-friends
  * Retrieves the authenticated user's friend list.
@@ -13,22 +16,48 @@ router.get(
     authenticate,
     async (req, res) => {
         try {
-            // Extract the user ID provided by the authenticate middleware
             const userId = req.user.id;
-            console.log(userId);
 
-            // Execute the database tool with the required input structure
-            const result = await fetchFriendsTool({
+            let result;
+
+            try {
+                result = await getFriends(userId);
+
+                if (result) {
+                    console.log(`Cache HIT: friends:${userId}`);
+
+                    return res.json(result);
+                }
+
+                console.log(`Cache MISS: friends:${userId}`);
+            }
+            catch (cacheErr) {
+                console.error("Redis GET Error:", cacheErr);
+            }
+
+            result = await fetchFriendsTool({
                 userId
             });
 
-            // Return the structured response from the database tool
+            try {
+                if (result.success) {
+                    await setFriends(
+                        userId,
+                        result
+                    );
+
+                    console.log(`Cache SET: friends:${userId}`);
+                }
+            }
+            catch (cacheErr) {
+                console.error("Redis SET Error:", cacheErr);
+            }
+
             return res.json(result);
 
         } catch (err) {
             console.error('fetch-friends route error:', err);
 
-            // Fallback error formatting matching the standard API response structure
             return res.status(500).json({
                 success: false,
                 data: null,

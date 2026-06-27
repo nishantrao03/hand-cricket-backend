@@ -4,6 +4,9 @@ const router = express.Router();
 const authenticate = require('../auth_utils/authenticate');
 const fetchFriendRequestsTool = require('../db/tools/fetchFriendRequests');
 
+const { getFriendRequests } = require("../cache/get_methods/getFriendRequests");
+const { setFriendRequests } = require("../cache/set_methods/setFriendRequests");
+
 /*
  * GET /api/fetch-friend-requests
  * Retrieves the authenticated user's friend requests.
@@ -13,22 +16,48 @@ router.get(
     authenticate,
     async (req, res) => {
         try {
-            // Extract the user ID provided by the authenticate middleware
             const userId = req.user.id;
-            console.log(userId);
 
-            // Execute the database tool with the required input structure
-            const result = await fetchFriendRequestsTool({
+            let result;
+
+            try {
+                result = await getFriendRequests(userId);
+
+                if (result) {
+                    console.log(`Cache HIT: friendRequests:${userId}`);
+
+                    return res.json(result);
+                }
+
+                console.log(`Cache MISS: friendRequests:${userId}`);
+            }
+            catch (cacheErr) {
+                console.error("Redis GET Error:", cacheErr);
+            }
+
+            result = await fetchFriendRequestsTool({
                 userId
             });
 
-            // Return the structured response from the database tool
+            try {
+                if (result.success) {
+                    await setFriendRequests(
+                        userId,
+                        result
+                    );
+
+                    console.log(`Cache SET: friendRequests:${userId}`);
+                }
+            }
+            catch (cacheErr) {
+                console.error("Redis SET Error:", cacheErr);
+            }
+
             return res.json(result);
 
         } catch (err) {
             console.error('fetch-friend-requests route error:', err);
 
-            // Fallback error formatting matching the standard API response structure
             return res.status(500).json({
                 success: false,
                 data: null,

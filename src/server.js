@@ -24,6 +24,7 @@ const acceptFriendRequestRoute = require('./routes/acceptFriendRequest');
 const declineFriendRequestRoute = require('./routes/declineFriendRequest');
 const fetchFriendRequestsRoute = require('./routes/fetchFriendRequests');
 const updateUserRoute = require('./routes/updateUser');
+const redisClient = require("./cache/client/redis");
 
 const socketHandler = require("./socket/socketHandler");
 
@@ -142,12 +143,21 @@ const io =
 
 socketHandler(io);
 
-server.listen(
-    PORT,
-    () => {
+async function startServer() {
+    try {
+        await redisClient.connect();
+        console.log("Connected");
 
-        console.log(
-            `Server running on http://localhost:${PORT}`
-        );
+        const response = await redisClient.ping();
+        console.log("PING:", response);
+
+        server.listen(PORT, () => {
+            console.log(`Server running on http://localhost:${PORT}`);
+        });
+
+    } catch (err) {
+        console.error(err);
     }
-);
+}
+
+startServer();
