@@ -24,10 +24,15 @@ function matchHistory(
     return `matchHistory:${userId}:${limit}:${sortOrder}:${cursor ?? "null"}:${outcome}`;
 }
 
+function matchStateKey(matchId) {
+    return `matchState:${matchId}`;
+}
+
 module.exports = {
     user,
     friendRequests,
     friends,
     matchInvitation,
-    matchHistory
+    matchHistory,
+    matchStateKey
 };

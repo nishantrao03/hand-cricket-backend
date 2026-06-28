@@ -259,6 +259,9 @@ class GameEngine {
                     balls:
                         inningsState.balls,
 
+                    innings:
+                        match.innings,
+
                     penaltyApplied
                 },
 
@@ -287,6 +290,9 @@ class GameEngine {
                 balls:
                     inningsState.balls,
 
+                innings:
+                        match.innings,
+
                 penaltyApplied
             },
 
@@ -313,6 +319,9 @@ class GameEngine {
 
         balls:
             inningsState.balls,
+
+        innings:
+                        match.innings,
 
         penaltyApplied
     };

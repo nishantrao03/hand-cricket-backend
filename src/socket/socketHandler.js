@@ -18,7 +18,25 @@ const {
     deleteMatchInvitation: deleteMatchInvitationCache
 } = require("../cache/delete_methods/deleteMatchInvitation");
 
+const { setMatchState } = require("../cache/set_methods/setMatchState");
+
+const { getMatchState } = require("../cache/get_methods/getMatchState");
+
+const { deleteMatchState } = require("../cache/delete_methods/deleteMatchState");
+
 const authenticateSocket = require("../auth_utils/socketAuthenticate");
+
+async function saveState(match) {
+    try {
+        if (!match) return;
+        await setMatchState(match.matchId, match);
+    } catch (err) {
+        console.error(
+            `Cache set failure for match ${match?.matchId}:`,
+            err
+        );
+    }
+}
 
 function cleanupMatch(
     matchId
@@ -92,6 +110,9 @@ function endMatch(
 
             match.status =
                 "ABANDONED";
+
+            match.phase = 
+                "MATCH_ABANDONED"
         }
 
         io.to(
@@ -178,6 +199,16 @@ function endMatch(
                         console.error(
                             `Invitation deletion error for ${matchId}:`,
                             deleteErr
+                        );
+                    }
+
+                    try {
+                        await deleteMatchState(matchId);
+                        console.log(`Match state cache deleted for ${matchId}`);
+                    } catch (stateCacheErr) {
+                        console.error(
+                            `Failed to delete match state cache for ${matchId}:`,
+                            stateCacheErr
                         );
                     }
 
@@ -540,7 +571,7 @@ async function persistMatchResult(
 
 module.exports = (io) => {
 
-    //io.use(authenticateSocket);
+    io.use(authenticateSocket);
 
     io.on(
         "connection",
@@ -559,7 +590,7 @@ module.exports = (io) => {
 
             socket.on(
                 "join-match",
-                (data) => {
+                async (data) => {
                     try {
                         const payload = JSON.parse(data);
                         const { matchId, playerId, overs, wickets } = payload;
@@ -575,7 +606,21 @@ module.exports = (io) => {
 
                         let match = MatchManager.getMatch(matchId);
 
-                        // 2. Checkpoint 1: The Pioneer (Match doesn't exist)
+                        // 2. Hydration Protocol: Check Cache if Memory is Empty
+                        if (!match) {
+                            try {
+                                const cachedMatch = await getMatchState(matchId);
+                                if (cachedMatch) {
+                                    // Inject the cache object back into the server's local memory
+                                    match = MatchManager.setMatch(cachedMatch);
+                                    console.log(`Match ${matchId} successfully hydrated from cache`);
+                                }
+                            } catch (cacheErr) {
+                                console.error(`Failed to hydrate match ${matchId} from cache:`, cacheErr);
+                            }
+                        }
+
+                        // 3. Checkpoint 1: The Pioneer (Match doesn't exist)
                         if (!match) {
                             match = MatchManager.createMatch({
                                 matchId,
@@ -584,7 +629,6 @@ module.exports = (io) => {
                                 wickets
                             });
                             
-                            // Explicitly set phase just to be safe, though MatchManager does it too
                             match.phase = "WAITING";
 
                             socket.join(matchId);
@@ -592,12 +636,14 @@ module.exports = (io) => {
 
                             console.log(`Match ${matchId} created by ${playerId}`);
                             socket.emit("join-match-success", { matchId, playerId });
+
+                            saveState(match);
                             
                             // Stop here. Wait for P2.
                             return; 
                         }
 
-                        // 3. Checkpoint 2: The Veteran (Is this user already on the manifest?)
+                        // 4. Checkpoint 2: The Veteran (Is this user already on the manifest?)
                         const isPlayer1 = match.player1Id === playerId;
                         const isPlayer2 = match.player2Id === playerId;
 
@@ -629,7 +675,7 @@ module.exports = (io) => {
 
                             // DO NOT RETURN. Fall through to the Ignition Sequence below.
                         }
-                        // 4. Checkpoint 3: The Challenger (Slot #2 is vacant)
+                        // 5. Checkpoint 3: The Challenger (Slot #2 is vacant)
                         else if (match.player2Id === null) {
                             
                             MatchManager.joinMatch(matchId, playerId);
@@ -641,13 +687,13 @@ module.exports = (io) => {
 
                             // DO NOT RETURN. Fall through to the Ignition Sequence below.
                         }
-                        // 5. Checkpoint 4: The Trespasser (Match is full)
+                        // 6. Checkpoint 4: The Trespasser (Match is full)
                         else {
                             socket.emit("match-full", { message: "Match is full" });
                             return;
                         }
 
-                        // 6. Phase 3: The Ignition Sequence
+                        // 7. Phase 3: The Ignition Sequence
                         // This block only executes if a Veteran or Challenger successfully joined above
                         if (matchRoom.size === 2 && match.phase === "WAITING") {
                             
@@ -670,6 +716,7 @@ module.exports = (io) => {
 
                             console.log(`Toss Winner: ${tossResult.tossWinnerId}`);
                         }
+                        saveState(match);
 
                     } catch (err) {
                         console.error("join-match handler error:", err);
@@ -735,7 +782,7 @@ module.exports = (io) => {
             // Update backend phase to PLAYING
             const match = MatchManager.getMatch(matchId);
             if (match) {
-                match.phase = "PLAYING";
+                match.phase = "TOSS_RESULT";
             }
 
             io.to(
@@ -753,11 +800,13 @@ module.exports = (io) => {
             console.log(
                 `${playerId} chose ${choice} in ${matchId}`
             );
+            
+            saveState(match);
 
-            startMoveTimer(
-                io,
-                matchId
-            );
+            // startMoveTimer(
+            //     io,
+            //     matchId
+            // );
 
         } catch (err) {
 
@@ -773,6 +822,75 @@ module.exports = (io) => {
         }
     }
 );
+
+    socket.on(
+            "enter-match",
+            (data) => {
+                try {
+                    const payload =
+                        JSON.parse(data);
+
+                    const {
+                        matchId,
+                        playerId
+                    } = payload;
+
+                    const match =
+                        MatchManager.getMatch(
+                            matchId
+                        );
+
+                    if (match) {
+                        if (playerId === match.player1Id) {
+                            match.player1Ready = true;
+                        } else if (playerId === match.player2Id) {
+                            match.player2Ready = true;
+                        }
+
+                        console.log(
+                            `${playerId} reported ready in match ${matchId}`
+                        );
+
+                        if (
+                            match.player1Ready &&
+                            match.player2Ready &&
+                            match.phase !== "PLAYING"
+                        ) {
+                            match.phase = "PLAYING";
+                            
+                            console.log(
+                                `Both players ready. Match ${matchId} phase set to PLAYING`
+                            );
+
+                            startMoveTimer(
+                                io,
+                                matchId
+                            );
+
+                            io.to(
+                                matchId
+                            ).emit(
+                                "match-starts",
+                                {
+                                    matchId
+                                }
+                            );
+                        }
+                        saveState(match);
+                    }
+
+                } catch (err) {
+
+                    console.error("enter-match handler error:", err);
+
+                    try {
+                        socket.emit("error", { message: "Internal server error" });
+                    } catch (emitErr) {
+                        console.error("Failed to emit error in enter-match handler:", emitErr);
+                    }
+                }
+            }
+        );
 
     socket.on(
     "submit-move",
@@ -920,6 +1038,9 @@ module.exports = (io) => {
             if (
                 result.matchResult
             ) {
+                match.phase = "MATCH_ENDED";
+                match.player1Ready = false;
+                match.player2Ready = false;
 
                 console.log("PERSISTING MATCH");
               await  persistMatchResult(
@@ -935,6 +1056,16 @@ module.exports = (io) => {
                 return;
             }
 
+            if (result.inningsResult) {
+                match.phase = "INNINGS_BREAK";
+                match.player1Ready = false;
+                match.player2Ready = false;
+                // match.innings = 2;
+                saveState(match);
+                return;
+            }
+
+            saveState(match);
             startMoveTimer(
                 io,
                 matchId
@@ -953,6 +1084,34 @@ module.exports = (io) => {
             return;
         }
     }
+);
+
+    socket.on(
+    "leave-match",
+    (data) => {
+        try {
+            const payload =
+                JSON.parse(data);
+
+            const {
+                matchId,
+                playerId
+            } = payload;
+
+            console.log(
+                `Player ${playerId} leaving match ${matchId}`
+            );
+
+            endMatch(
+                io,
+                matchId,
+                "PLAYER_LEFT"
+            );
+
+        } catch (err) {
+            console.error("leave-match handler error:", err);
+        }
+    }
 );
 
             socket.on(

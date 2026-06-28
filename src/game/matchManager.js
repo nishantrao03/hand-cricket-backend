@@ -27,6 +27,10 @@ class MatchManager {
 
             battingFirstPlayerId: null,
 
+            player1Ready: false,
+
+            player2Ready: false,
+
             innings: 1,
 
             target: null,
@@ -76,6 +80,11 @@ class MatchManager {
 
     getMatch(matchId) {
         return activeMatches.get(matchId);
+    }
+
+    setMatch(match) {
+        activeMatches.set(match.matchId, match);
+        return match;
     }
 
     joinMatch(matchId, player2Id) {
