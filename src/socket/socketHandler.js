@@ -593,7 +593,7 @@ module.exports = (io) => {
                 async (data) => {
                     try {
                         const payload = JSON.parse(data);
-                        const { matchId, playerId, overs, wickets } = payload;
+                        const { matchId, playerId, userName, overs, wickets } = payload;
 
                         // 1. Pre-Flight Setup: Stamp the socket for easy eviction later
                         socket.playerId = playerId;
@@ -622,9 +622,10 @@ module.exports = (io) => {
 
                         // 3. Checkpoint 1: The Pioneer (Match doesn't exist)
                         if (!match) {
-                            match = MatchManager.createMatch({
+                            match = await MatchManager.createMatch({
                                 matchId,
                                 player1Id: playerId,
+                                player1UserName: userName,
                                 overs,
                                 wickets
                             });
@@ -678,7 +679,7 @@ module.exports = (io) => {
                         // 5. Checkpoint 3: The Challenger (Slot #2 is vacant)
                         else if (match.player2Id === null) {
                             
-                            MatchManager.joinMatch(matchId, playerId);
+                            await MatchManager.joinMatch(matchId, playerId, userName);
                             socket.join(matchId);
                             matchRoom.add(playerId);
 
@@ -702,7 +703,9 @@ module.exports = (io) => {
                             io.to(matchId).emit("match-ready", {
                                 matchId,
                                 player1Id: match.player1Id,
-                                player2Id: match.player2Id
+                                player1UserName: match.player1UserName,
+                                player2Id: match.player2Id,
+                                player2UserName: match.player2UserName
                             });
 
                             console.log(`Match ${matchId} is READY`);
