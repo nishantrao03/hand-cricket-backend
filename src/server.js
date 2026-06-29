@@ -24,6 +24,8 @@ const acceptFriendRequestRoute = require('./routes/acceptFriendRequest');
 const declineFriendRequestRoute = require('./routes/declineFriendRequest');
 const fetchFriendRequestsRoute = require('./routes/fetchFriendRequests');
 const updateUserRoute = require('./routes/updateUser');
+const upsertUserRoute = require('./routes/upsertUser');
+
 const redisClient = require("./cache/client/redis");
 
 const socketHandler = require("./socket/socketHandler");
@@ -123,6 +125,8 @@ app.use(declineFriendRequestRoute);
 app.use(fetchFriendRequestsRoute);
 
 app.use(updateUserRoute);
+
+app.use(upsertUserRoute);
 
 const server =
     http.createServer(app);
