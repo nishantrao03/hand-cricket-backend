@@ -28,11 +28,19 @@ function matchStateKey(matchId) {
     return `matchState:${matchId}`;
 }
 
+function rateLimit(
+    userId,
+    route
+) {
+    return `rateLimit:${userId}:${route}`;
+}
+
 module.exports = {
     user,
     friendRequests,
     friends,
     matchInvitation,
     matchHistory,
-    matchStateKey
+    matchStateKey,
+    rateLimit
 };

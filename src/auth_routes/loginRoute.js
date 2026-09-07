@@ -4,6 +4,7 @@ const admin = require('../firebase-admin'); // Adjust path as necessary
 const { generateAccessToken, generateRefreshToken } = require('../jwt/jwtUtils');
 const ACCESS_COOKIE_EXPIRY = process.env.ACCESS_COOKIE_EXPIRY;
 const REFRESH_COOKIE_EXPIRY = process.env.REFRESH_COOKIE_EXPIRY;
+const rateLimit = require('../auth_utils/rateLimit');
 //require('dotenv').config();
 
 const router = express.Router();

@@ -5,6 +5,14 @@ const GameEngine =
 
 const MatchManager = require("../game/matchManager");
 
+const {
+    socketConnectionsActive,
+    socketEventsTotal,
+    socketEventErrorsTotal,
+    socketEventDuration,
+    socketRejoinsTotal
+} = require("../monitoring/socketMetrics");
+
 const createMatch =
     require("../db/tools/createMatch");
 
@@ -577,6 +585,8 @@ module.exports = (io) => {
         "connection",
         (socket) => {
 
+            socketConnectionsActive.inc();
+
             try {
 
                 console.log(
@@ -591,6 +601,13 @@ module.exports = (io) => {
             socket.on(
                 "join-match",
                 async (data) => {
+
+                    socketEventsTotal
+                        .labels("join-match")
+                        .inc();
+
+                    const startTime = Date.now();
+
                     try {
                         const payload = JSON.parse(data);
                         const { matchId, playerId, userName, overs, wickets } = payload;
@@ -671,6 +688,12 @@ module.exports = (io) => {
                             matchRoom.add(playerId);
                             console.log(`Player ${playerId} rejoined match ${matchId}`);
 
+                            socketEventsTotal
+                                .labels("rejoin-match")
+                                .inc();
+
+                            socketRejoinsTotal.inc();
+
                             // Emit full match state for the frontend to digest
                             socket.emit("rejoin-match-success", { match });
 
@@ -722,12 +745,25 @@ module.exports = (io) => {
                         saveState(match);
 
                     } catch (err) {
+
+                        socketEventErrorsTotal
+                            .labels("join-match")
+                            .inc();
+
                         console.error("join-match handler error:", err);
                         try {
                             socket.emit("error", { message: "Internal server error" });
                         } catch (emitErr) {
                             console.error("Failed to emit error in join-match handler:", emitErr);
                         }
+                    }
+                    finally {
+
+                socketEventDuration
+                    .labels("join-match")
+                    .observe(
+                        Date.now() - startTime
+                        );
                     }
                 }
             );
@@ -764,6 +800,13 @@ module.exports = (io) => {
         socket.on(
     "choose-bat-bowl",
     (data) => {
+
+        const startTime = Date.now();
+
+        socketEventsTotal
+            .labels("choose-bat-bowl")
+            .inc();
+
         try {
 
             const payload =
@@ -813,6 +856,9 @@ module.exports = (io) => {
 
         } catch (err) {
 
+            socketEventErrorsTotal
+                .labels("choose-bat-bowl")
+                .inc();
             console.error("choose-bat-bowl handler error:", err);
 
             try {
@@ -823,12 +869,27 @@ module.exports = (io) => {
 
             return;
         }
+        finally {
+
+            socketEventDuration
+                .labels("choose-bat-bowl")
+                .observe(
+                    Date.now() - startTime
+                    );
+        }
     }
 );
 
     socket.on(
             "enter-match",
             (data) => {
+
+                const startTime = Date.now();
+
+                socketEventsTotal
+                    .labels("enter-match")
+                    .inc();
+
                 try {
                     const payload =
                         JSON.parse(data);
@@ -884,6 +945,10 @@ module.exports = (io) => {
 
                 } catch (err) {
 
+                    socketEventErrorsTotal
+                        .labels("enter-match")
+                        .inc();
+
                     console.error("enter-match handler error:", err);
 
                     try {
@@ -892,12 +957,27 @@ module.exports = (io) => {
                         console.error("Failed to emit error in enter-match handler:", emitErr);
                     }
                 }
+                finally {
+
+                    socketEventDuration
+                        .labels("enter-match")
+                        .observe(
+                            Date.now() - startTime
+                            );
+                }
             }
         );
 
     socket.on(
     "submit-move",
     async (data) => {
+
+        const startTime = Date.now();
+
+        socketEventsTotal
+            .labels("submit-move")
+            .inc();
+
         try {
 
             const payload =
@@ -1076,6 +1156,9 @@ module.exports = (io) => {
 
         } catch (err) {
 
+            socketEventErrorsTotal
+                .labels("submit-move")
+                .inc();
             console.error("submit-move handler error:", err);
 
             try {
@@ -1086,12 +1169,27 @@ module.exports = (io) => {
 
             return;
         }
+        finally {
+
+            socketEventDuration
+                .labels("submit-move")
+                .observe(
+                    Date.now() - startTime
+                    );
+        }
     }
 );
 
     socket.on(
     "leave-match",
     (data) => {
+
+        const startTime = Date.now();
+
+        socketEventsTotal
+            .labels("leave-match")
+            .inc();
+
         try {
             const payload =
                 JSON.parse(data);
@@ -1112,7 +1210,18 @@ module.exports = (io) => {
             );
 
         } catch (err) {
+            socketEventErrorsTotal
+                .labels("leave-match")
+                .inc();
             console.error("leave-match handler error:", err);
+        }
+        finally {
+
+            socketEventDuration
+                .labels("leave-match")
+                .observe(
+                    Date.now() - startTime
+                    );
         }
     }
 );
@@ -1120,6 +1229,9 @@ module.exports = (io) => {
             socket.on(
     "disconnect",
     () => {
+
+        socketConnectionsActive.dec();
+    
         try {
 
             console.log(

@@ -8,6 +8,7 @@ const ACCESS_COOKIE_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY;
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET; // Store secret in .env
 const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET; 
+const rateLimit = require('../auth_utils/rateLimit');
 
 router.post('/refresh-token', (req, res) => {
   console.log("Refreshing access token...");

@@ -3,7 +3,9 @@ const express = require('express');
 
 const router = express.Router();
 
-router.post('/logout', (req, res) => {
+const rateLimit = require('../auth_utils/rateLimit');
+
+router.post('/logout', rateLimit, (req, res) => {
   res.clearCookie('access_token');
   res.clearCookie('refresh_token');
   return res.status(200).json({ message: 'Logged out successfully' });

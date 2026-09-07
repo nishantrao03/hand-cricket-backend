@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const fetchFriendsTool = require('../db/tools/fetchFriends');
 
 const { getFriends } = require("../cache/get_methods/getFriends");
@@ -14,6 +15,7 @@ const { setFriends } = require("../cache/set_methods/setFriends");
 router.get(
     '/api/fetch-friends',
     authenticate,
+    rateLimit,
     async (req, res) => {
         try {
             const userId = req.user.id;
@@ -26,6 +28,7 @@ router.get(
                 if (result) {
                     console.log(`Cache HIT: friends:${userId}`);
 
+                    console.log(res.statusCode);
                     return res.json(result);
                 }
 

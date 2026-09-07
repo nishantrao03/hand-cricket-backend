@@ -7,7 +7,9 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET; // your JWT secret
 const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
-router.get('/access-token', (req, res) => {
+const rateLimit = require('../auth_utils/rateLimit');
+
+router.get('/access-token', rateLimit, (req, res) => {
   console.log("Checking access token...");
   const accessToken = req.cookies.access_token;
   console.log("Access Token from cookie:", accessToken);

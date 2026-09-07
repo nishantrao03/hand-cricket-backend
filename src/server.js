@@ -26,6 +26,10 @@ const fetchFriendRequestsRoute = require('./routes/fetchFriendRequests');
 const updateUserRoute = require('./routes/updateUser');
 const upsertUserRoute = require('./routes/upsertUser');
 
+const { register } = require("./monitoring/prometheus");
+
+const metricsMiddleware = require("./monitoring/metricsMiddleware");
+
 const redisClient = require("./cache/client/redis");
 
 const socketHandler = require("./socket/socketHandler");
@@ -89,6 +93,21 @@ app.use(
         credentials: true
     })
 );
+
+app.get("/metrics", async (req, res) => {
+
+    res.set(
+        "Content-Type",
+        register.contentType
+    );
+
+    res.end(
+        await register.metrics()
+    );
+
+});
+
+app.use(metricsMiddleware);
 
 app.use(index);
 
