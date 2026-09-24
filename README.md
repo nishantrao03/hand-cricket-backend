@@ -25,6 +25,25 @@ Frontend: https://hand-cricket-frontend-pi.vercel.app/
 
 ---
 
+## 📑 Table of Contents
+
+* [Features](#features)
+* [Tech Stack](#tech-stack)
+* [Project Structure](#project-structure)
+* [Authentication Flow](#authentication-flow)
+* [Gameplay Flow](#gameplay-flow)
+* [Caching Strategy](#caching-strategy)
+* [Rate Limiting](#rate-limiting)
+* [Telemetry & Observability](#telemetry--observability)
+* [Environment Variables](#environment-variables)
+* [Installation](#installation)
+* [API Overview](#api-overview)
+* [Deployment](#deployment)
+* [Frontend Repository](#frontend-repository)
+* [License](#license)
+
+---
+
 # Features
 
 - JWT authentication using access & refresh token cookies
