@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const updateUserTool = require('../db/tools/updateUser');
 const { setUser } = require("../cache/set_methods/setUser");
 
@@ -9,7 +10,7 @@ const { setUser } = require("../cache/set_methods/setUser");
  * PUT /api/update-user
  * Updates the authenticated user's profile information.
  */
-router.put('/api/update-user', authenticate, async (req, res) => {
+router.put('/api/update-user', authenticate, rateLimit, async (req, res) => {
     try {
         const userId = req.user.id;
 

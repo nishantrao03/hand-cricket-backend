@@ -30,6 +30,7 @@ Frontend: https://hand-cricket-frontend-pi.vercel.app/
 - JWT authentication using access & refresh token cookies
 - Firebase Authentication (Email/Password + Google Sign-In)
 - Secure protected REST APIs
+- Route-specific rate limiting using Redis
 - Real-time multiplayer gameplay using Socket.IO
 - Match invitation system
 - Friend & Friend Request management
@@ -39,6 +40,7 @@ Frontend: https://hand-cricket-frontend-pi.vercel.app/
 - Automatic timeout handling
 - Match abandonment handling
 - Match history persistence
+- Comprehensive telemetry and observability via Prometheus
 - Scalable modular backend architecture
 
 ---
@@ -55,6 +57,7 @@ Frontend: https://hand-cricket-frontend-pi.vercel.app/
 | Redis | Caching |
 | Firebase Admin SDK | Authentication |
 | JWT | Authorization |
+| Prometheus | Telemetry & Monitoring |
 | Render | Deployment |
 
 ---
@@ -71,6 +74,7 @@ src/
 ├── db/                # Database tools & queries
 ├── game/              # Match engine & game logic
 ├── jwt/               # JWT generation & verification
+├── monitoring/        # Telemetry & Prometheus metrics
 ├── routes/            # Application REST APIs
 ├── socket/            # Socket.IO event handlers
 ├── test/              # Testing utilities
@@ -118,6 +122,34 @@ Cached resources include:
 - Active match state
 
 Cache is updated whenever underlying data changes to maintain consistency.
+
+---
+
+---
+
+# Rate Limiting
+
+A route-specific rate limiting system, backed by Redis, ensures equitable resource allocation and optimal API responsiveness. 
+
+Request thresholds are tailored to individual endpoints over a rolling time window (e.g., 1 hour). By monitoring request volumes per user ID and route, the system guarantees stable performance and fair usage across the platform.
+
+---
+
+# Telemetry & Observability
+
+Application-level telemetry is implemented using Prometheus to monitor both HTTP APIs and Socket.IO communication, ensuring peak performance and system health. All metrics are exposed via a `/metrics` endpoint for long-term monitoring and Grafana visualization.
+
+### API Monitoring
+Tracks HTTP request volumes, latency distributions (P50, P90, P99), and Node.js runtime statistics (CPU, memory, event loop efficiency) to guide capacity planning and continuous performance optimization.
+
+### Socket.IO Monitoring
+Provides granular visibility into real-time gameplay by tracking:
+- Active concurrent player connections
+- Gameplay event frequencies (e.g., `submit-move`, `join-match`)
+- Event execution durations
+- Successful match reconnections
+
+This comprehensive monitoring ensures a highly responsive and seamless multiplayer experience.
 
 ---
 

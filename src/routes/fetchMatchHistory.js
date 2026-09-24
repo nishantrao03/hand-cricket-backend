@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const authenticate = require("../auth_utils/authenticate");
+const rateLimit = require('../auth_utils/rateLimit');
 const fetchPaginatedMatchHistory = require("../db/tools/fetchPaginatedMatchHistory");
 
 const { getMatchHistory } = require("../cache/get_methods/getMatchHistory");
 const { setMatchHistory } = require("../cache/set_methods/setMatchHistory");
 
-router.get("/api/match-history", authenticate, async (req, res) => {
+router.get("/api/match-history", authenticate, rateLimit, async (req, res) => {
     try {
 
         const userId = req.user.id;

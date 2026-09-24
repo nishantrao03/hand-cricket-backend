@@ -3,11 +3,12 @@ const router = express.Router();
 
 const acceptFriendRequestTool = require('../db/tools/acceptFriendRequest');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 
 const { deleteFriends } = require("../cache/delete_methods/deleteFriends");
 const { deleteFriendRequests } = require("../cache/delete_methods/deleteFriendRequests");
 
-router.post('/api/accept-friend-request', authenticate, async (req, res) => {
+router.post('/api/accept-friend-request', authenticate, rateLimit, async (req, res) => {
     try {
         // The receiver is the authenticated user accepting the request
         const receiverId = req.user.id;

@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const upsertUserTool = require('../db/tools/upsertUser');
 
 const { getUser } = require("../cache/get_methods/getUser");
@@ -11,6 +12,7 @@ const { setUser } = require("../cache/set_methods/setUser");
 router.get(
     '/api/upsert-user',
     authenticate,
+    rateLimit,
     async (req, res) => {
         try {
             const id = req.user.id;

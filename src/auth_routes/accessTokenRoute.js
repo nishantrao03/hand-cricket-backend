@@ -9,7 +9,7 @@ const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
 
 const rateLimit = require('../auth_utils/rateLimit');
 
-router.get('/access-token', rateLimit, (req, res) => {
+router.get('/access-token', (req, res) => {
   console.log("Checking access token...");
   const accessToken = req.cookies.access_token;
   console.log("Access Token from cookie:", accessToken);

@@ -4,6 +4,7 @@ const router = express.Router();
 const fetchMatchInvitationTool =
     require('../db/tools/fetchMatchInvitation');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 
 const { getMatchInvitation } =
     require("../cache/get_methods/getMatchInvitation");
@@ -14,6 +15,7 @@ const { setMatchInvitation } =
 router.post(
     '/api/fetch-match-invitation',
     authenticate,
+    rateLimit,
     async (req, res) => {
 
         try {

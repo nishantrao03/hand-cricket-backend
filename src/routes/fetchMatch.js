@@ -3,9 +3,11 @@ const router = express.Router();
 
 const fetchMatchTool = require('../db/tools/fetchMatch');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
+
 
 // GET /api/fetch-match?id=<matchId>
-router.get('/api/fetch-match', authenticate, async (req, res) => {
+router.get('/api/fetch-match', authenticate, rateLimit, async (req, res) => {
   try {
     const id = req.query.id || (req.body && req.body.id);
     const result = await fetchMatchTool({ id });

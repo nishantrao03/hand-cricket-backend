@@ -3,9 +3,10 @@ const router = express.Router();
 
 const sendFriendRequestTool = require('../db/tools/sendFriendRequest');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const { deleteFriendRequests } = require("../cache/delete_methods/deleteFriendRequests");
 
-router.post('/api/send-request', authenticate, async (req, res) => {
+router.post('/api/send-request', authenticate, rateLimit, async (req, res) => {
     try {
         const { senderId, receiverId } = req.body || {};
 

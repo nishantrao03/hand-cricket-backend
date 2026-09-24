@@ -3,9 +3,10 @@ const router = express.Router();
 
 const removeFriendTool = require('../db/tools/removeFriend');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const { deleteFriends } = require("../cache/delete_methods/deleteFriends");
 
-router.post('/api/remove-friend', authenticate, async (req, res) => {
+router.post('/api/remove-friend', authenticate, rateLimit, async (req, res) => {
     try {
         const { userId, friendId } = req.body || {};
 

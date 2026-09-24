@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const fetchFriendRequestsTool = require('../db/tools/fetchFriendRequests');
 
 const { getFriendRequests } = require("../cache/get_methods/getFriendRequests");
@@ -14,6 +15,7 @@ const { setFriendRequests } = require("../cache/set_methods/setFriendRequests");
 router.get(
     '/api/fetch-friend-requests',
     authenticate,
+    rateLimit,
     async (req, res) => {
         try {
             const userId = req.user.id;

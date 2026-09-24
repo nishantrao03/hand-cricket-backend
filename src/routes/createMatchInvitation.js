@@ -4,6 +4,7 @@ const router = express.Router();
 const createMatchInvitationTool =
     require('../db/tools/createMatchInvitation');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 
 const {
     setMatchInvitation
@@ -12,6 +13,7 @@ const {
 router.post(
     '/api/create-match-invitation',
     authenticate,
+    rateLimit,
     async (req, res) => {
 
         try {

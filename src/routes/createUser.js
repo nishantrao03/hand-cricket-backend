@@ -3,9 +3,10 @@ const router = express.Router();
 
 const createUserTool = require('../db/tools/createUser');
 const authenticate = require('../auth_utils/authenticate');
+const rateLimit = require('../auth_utils/rateLimit');
 const { setUser } = require("../cache/set_methods/setUser");
 
-router.post('/api/create-user', authenticate, async (req, res) => {
+router.post('/api/create-user', authenticate, rateLimit, async (req, res) => {
     try {
         const payload = req.body || {};
         const result = await createUserTool(payload);
